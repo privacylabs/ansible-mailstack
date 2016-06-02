@@ -1,0 +1,3 @@
+# header_checks
+
+/X-Spam-Level: \*{10,}/ REJECT Looks like spam to me.

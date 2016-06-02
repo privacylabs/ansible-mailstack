@@ -1,0 +1,6 @@
+# systemd-specific settings for rmilter
+
+.include /etc/rmilter.conf.common
+
+# rmilter is socket-activated under systemd
+bind_socket = inet:9900@127.0.0.1;

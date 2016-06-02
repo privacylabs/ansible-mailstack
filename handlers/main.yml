@@ -1,0 +1,11 @@
+- name: handler - restart postfix
+  service: name=postfix state=restarted
+
+- name: handler - restart dovecot
+  service: name=dovecot state=restarted
+
+- name: handler - restart opendkim
+  service: name=opendkim state=restarted
+
+- name: handler -  restart opendmarc
+  service: name=opendmarc state=restarted

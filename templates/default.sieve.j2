@@ -1,0 +1,7 @@
+# File mails with a Spamassassin score of 4.0 or more
+# into the "junk" folder.
+require "fileinto";
+if header :contains "X-Spam-Level" "****"
+{
+    fileinto "Junk";
+}

@@ -1,0 +1,8 @@
+bind = yes
+bind_dn = uid=postfix,{{ ldap_service_searchbase }}
+bind_pw = {{ postfixuserpassword }}
+server_host = ldap://{{ ldap_ip }}:389
+search_base = {{ ldap_user_searchbase }}
+domain = {{ domain }}
+query_filter = (mailLocalAddress=%s)
+result_attribute = mailRoutingAddress

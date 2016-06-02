@@ -1,0 +1,5 @@
+# Identity (RegEx)		Action
+
+/^(mail\.{{ domain.split(".") | join("\.") }})$/	REJECT Hostname Abuse: $1
+/^(1\.2\.3\.4)$/		REJECT Hostname Abuse: $1
+/^(\[1\.2\.3\.4\])$/		REJECT Hostname Abuse: $1
