@@ -88,7 +88,7 @@ spamd {
 	# Default: empty
 	whitelist = 127.0.0.1/32, 192.168.0.0/16;
 
-	spamd_never_reject = true;
+	# spamd_never_reject = true;
 
 	# rspamd_metric - metric for using with rspamd
 	# Default: "default"
