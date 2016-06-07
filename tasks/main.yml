@@ -150,16 +150,16 @@
     become: yes
 
   - name: Create DH keys for PFS locally
-    shell: openssl dhparam -2 -out dh_2048.pem 2048 chdir=/etc/postfix/certs
+    shell: openssl dhparam -2 -out dh_1024.pem 1024 chdir=/etc/postfix/certs
     args:
-      creates: /etc/postfix/certs/dh_2048.pem
+      creates: /etc/postfix/certs/dh_1024.pem
     become: yes
     when: hostvars['localhost']['dh_keys'] is not defined
 
   - name: Copy DH keys for Postfix PFS if we already created them
     copy:
       content: "{{ hostvars['localhost']['dh_keys'].stdout }}"
-      dest: /etc/postfix/certs/dh_2048.pem
+      dest: /etc/postfix/certs/dh_1024.pem
     become: yes
     when: hostvars['localhost']['dh_keys'] is defined
 
