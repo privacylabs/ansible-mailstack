@@ -30,7 +30,7 @@ ssl_key = <{{ tls_key_file_location }}
 # when Dovecot needs to act as an SSL client (e.g. imapc backend). The
 # directory is usually /etc/ssl/certs in Debian-based systems and the file is
 # /etc/pki/tls/cert.pem in RedHat-based systems.
-#ssl_client_ca_dir =
+ssl_client_ca_dir = /etc/ssl/certs
 #ssl_client_ca_file =
 
 # Request client to send a certificate. If you also want to require it, set
