@@ -1,0 +1,11 @@
+[Unit]
+Description=Generate 2k DH params after installation
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/2kdh_param_gen
+PIDFile=/tmp/2kdh_param_gen.pid
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

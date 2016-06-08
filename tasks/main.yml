@@ -149,12 +149,42 @@
       mode: 0600
     become: yes
 
+  - name: Check if our one-run service created 2048 bit DH parameters
+    stat:
+      path: /etc/postfix/certs/dh_2048.pem
+    register: dh_2048
+    become: yes
+
+  - name: add one-run service for generating 2048 bit DH parameters if they don't exist
+    copy:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      mode: u+x
+    with_items:
+      - { src: 'gen_2kdh_postinstall.service', dest: '/etc/systemd/system/gen_2kdh_postinstall.service' }
+      - { src: '2kdh_param_gen', dest: '/usr/bin/2kdh_param_gen' }
+    become: yes
+    when: dh_2048.stat.exists == false
+
+  - name: Reload systemctl
+    command: systemctl daemon-reload
+    become: yes
+    when: dh_2048.stat.exists == false
+
+  - name: Start gen_2kdh_postinstall
+    service:
+      enabled: yes
+      name: gen_2kdh_postinstall
+      state: restarted
+    become: yes
+    when: dh_2048.stat.exists == false
+
   - name: Create DH keys for PFS locally
     shell: openssl dhparam -2 -out dh_1024.pem 1024 chdir=/etc/postfix/certs
     args:
       creates: /etc/postfix/certs/dh_1024.pem
     become: yes
-    when: hostvars['localhost']['dh_keys'] is not defined
+    when: (hostvars['localhost']['dh_keys'] is undefined) and (dh_2048.stat.exists == false)
 
   - name: Copy DH keys for Postfix PFS if we already created them
     copy:
@@ -163,18 +193,26 @@
     become: yes
     when: hostvars['localhost']['dh_keys'] is defined
 
-  # - name: add cron job to periodically refresh DH parameters
-  #   cron:
-  #     name: "renew dh parameters"
-  #     cron_file: dh_params
-  #     user: root
-  #     month: "3,6,9,12"
-  #     day: "28"
-  #     hour: "13"
-  #     minute: "40"
-  #     job: "openssl dhparam -2 -out /etc/postfix/certs/dh_2048.pem 2048"
-  #     state: present
-  #   become: yes
+  - name: link dh params as needed
+    file:
+      src: /etc/postfix/certs/dh_1024.pem
+      dest: /etc/postfix/certs/dh_params.pem
+      state: link
+    become: yes
+    when: dh_2048.stat.exists == false
+
+  - name: add cron job to periodically refresh DH parameters
+    cron:
+      name: "renew dh parameters"
+      cron_file: dh_params
+      user: root
+      month: "3,6,9,12"
+      day: "28"
+      hour: "13"
+      minute: "40"
+      job: "openssl dhparam -2 -out /etc/postfix/certs/dh_2048.pem 2048"
+      state: present
+    become: yes
 
   #opendkim
   - name: Install opendkim packages

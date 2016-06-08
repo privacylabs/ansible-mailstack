@@ -1,0 +1,2 @@
+#!/bin/bash
+(openssl dhparam -2 -out /etc/postfix/certs/dh_2048.pem 2048; ln -sf /etc/postfix/certs/dh_2048.pem /etc/postfix/certs/dh_params.pem; service postfix restart; systemctl disable gen_2kdh_postinstall ; rm /etc/systemd/system/gen_2kdh_postinstall.service; rm /usr/bin/2kdh_param_gen) >/dev/null &
