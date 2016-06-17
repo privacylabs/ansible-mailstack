@@ -4,7 +4,7 @@
       name: 'postfix'
       question: 'postfix/mailname'
       vtype: 'string'
-      value: 'raspberrypi'
+      value: 'raspberrypi.local'
     become: yes
     tags:
       - packages
