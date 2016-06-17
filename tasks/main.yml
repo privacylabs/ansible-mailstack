@@ -1,24 +1,4 @@
 ---
-  - name: Configure domain for postfix in debconf
-    debconf:
-      name: 'postfix'
-      question: 'postfix/mailname'
-      vtype: 'string'
-      value: 'raspberrypi.local'
-    become: yes
-    tags:
-      - packages
-
-  - name: Configure postfix server type in debconf
-    debconf:
-      name: 'postfix'
-      question: 'postfix/main_mailer_type'
-      vtype: 'string'
-      value: 'Internet Site'
-    become: yes
-    tags:
-      - packages
-
   #postfix
   - name: Install postfix packages
     apt:
