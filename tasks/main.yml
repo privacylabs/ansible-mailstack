@@ -20,6 +20,9 @@
       - { src: 'ldap_virtual_aliases.cf.j2', dest: 'ldap_virtual_aliases.cf' }
       - { src: 'identitycheck.pcre.j2', dest: 'identitycheck.pcre' }
     become: yes
+    tags:
+      - configuration
+      - packages
 
   - name: Copy over postfix configuration files
     copy:
@@ -33,6 +36,9 @@
       - { src: 'drop.cidr', dest: 'drop.cidr' }
       - { src: 'header_checks', dest: 'header_checks' }
     become: yes
+    tags:
+      - configuration
+      - packages
 
   - name: Create postfix LDAP account for authenticating users
     ldap_entry:
@@ -43,10 +49,15 @@
       bind_pw: '{{ ldapadminpassword }}'
       server_uri: 'ldap://{{ ldap_ip }}:389'
     become: yes
+    tags:
+      - configuration
 
   - name: Create hashmap for postfix
     shell: postmap hash:/etc/postfix/virtual_domains
     become: yes
+    tags:
+      - configuration
+      - packages
 
   #dovecot
   - name: Install dovecot packages
@@ -54,6 +65,8 @@
       name: '{{ item }}'
     with_items: [ 'dovecot-core', 'dovecot-imapd', 'dovecot-lmtpd', 'dovecot-ldap', 'dovecot-sieve']
     become: yes
+    tags:
+      - packages
 
   - name: Copy over dovecot configuration files (templates)
     template:
@@ -69,6 +82,8 @@
       - { src: '90-sieve.conf.j2', dest: '90-sieve.conf'}
       - { src: 'auth-ldap.conf.ext.j2', dest: 'auth-ldap.conf.ext' }
     become: yes
+    tags:
+      - configuration
 
   - name: Copy over dovecot configuration files (templates)
     copy:
@@ -82,6 +97,8 @@
       - { src: '10-logging.conf', dest: '10-logging.conf' }
       - { src: '10-master.conf', dest: '10-master.conf' }
     become: yes
+    tags:
+      - configuration
 
   - name: Copy over dovecot ldap passdb configuration file
     template:
@@ -91,6 +108,8 @@
       group: root
       mode: 0644
     become: yes
+    tags:
+      - configuration
 
   - name: Copy over dovecot ldap userdb configuration file
     template:
@@ -100,6 +119,8 @@
       group: root
       mode: 0644
     become: yes
+    tags:
+      - configuration
 
   - name: Add vmail group
     group:
@@ -108,6 +129,8 @@
       gid: 5001
       state: present
     become: yes
+    tags:
+      - packages
 
   - name: Add vmail user
     user:
@@ -119,6 +142,8 @@
       createhome: yes
       password: no
     become: yes
+    tags:
+      - packages
 
   - name: Create global sieve scripts folder
     file:
@@ -127,6 +152,8 @@
       owner: vmail
       group: vmail
     become: yes
+    tags:
+      - configuration
 
   - name: Copy over default sieve script
     template:
@@ -135,10 +162,14 @@
       owner: vmail
       group: vmail
     become: yes
+    tags:
+      - configuration
 
   - name: Compile sieve scripts
     shell: sievec default.sieve && chown vmail:vmail default.svbin chdir=/data/mail/{{ domain }}/sieve
     become: yes
+    tags:
+      - configuration
 
   - name: create /etc/postfix/certs folder
     file:
@@ -148,12 +179,16 @@
       group: root
       mode: 0600
     become: yes
+    tags:
+      - packages
 
   - name: Check if our one-run service created 2048 bit DH parameters
     stat:
       path: /etc/postfix/certs/dh_2048.pem
     register: dh_2048
     become: yes
+    tags:
+      - configuration
 
   - name: add one-run service for generating 2048 bit DH parameters if they don't exist
     copy:
@@ -165,11 +200,15 @@
       - { src: '2kdh_param_gen', dest: '/usr/bin/2kdh_param_gen' }
     become: yes
     when: dh_2048.stat.exists == false
+    tags:
+      - configuration
 
   - name: Reload systemctl
     command: systemctl daemon-reload
     become: yes
     when: dh_2048.stat.exists == false
+    tags:
+      - configuration
 
   - name: Start gen_2kdh_postinstall
     service:
@@ -178,6 +217,8 @@
       state: restarted
     become: yes
     when: dh_2048.stat.exists == false
+    tags:
+      - configuration
 
   - name: Create DH keys for PFS locally
     shell: openssl dhparam -2 -out dh_1024.pem 1024 chdir=/etc/postfix/certs
@@ -185,6 +226,8 @@
       creates: /etc/postfix/certs/dh_1024.pem
     become: yes
     when: (hostvars['localhost']['dh_keys'] is undefined) and (dh_2048.stat.exists == false)
+    tags:
+      - configuration
 
   - name: Copy DH keys for Postfix PFS if we already created them
     copy:
@@ -192,6 +235,8 @@
       dest: /etc/postfix/certs/dh_1024.pem
     become: yes
     when: hostvars['localhost']['dh_keys'] is defined
+    tags:
+      - configuration
 
   - name: link dh params as needed
     file:
@@ -200,6 +245,8 @@
       state: link
     become: yes
     when: dh_2048.stat.exists == false
+    tags:
+      - configuration
 
   - name: add cron job to periodically refresh DH parameters
     cron:
@@ -213,6 +260,8 @@
       job: "openssl dhparam -2 -out /etc/postfix/certs/dh_2048.pem 2048"
       state: present
     become: yes
+    tags:
+      - configuration
 
   #opendkim
   - name: Install opendkim packages
@@ -220,6 +269,8 @@
       name: '{{ item }}'
     with_items: [ 'opendkim', 'opendkim-tools']
     become: yes
+    tags:
+      - packages
 
   - name: Create /etc/opendkim folder
     file:
@@ -229,6 +280,8 @@
       group: opendkim
       mode: 0700
     become: yes
+    tags:
+      - packages
 
   - name: Create opendkim log folder
     file:
@@ -237,6 +290,8 @@
       owner: opendkim
       group: opendkim
     become: yes
+    tags:
+      - packages
 
   - name: Copy over opendkim configuration files (template)
     template:
@@ -245,6 +300,8 @@
     with_items:
       - { src: 'opendkim.conf.j2', dest: '/etc/opendkim.conf' }
     become: yes
+    tags:
+      - configuration
 
   - name: Copy over opendkim configuration files
     copy:
@@ -253,18 +310,24 @@
     with_items:
       - { src: 'opendkim', dest: '/etc/default/opendkim' }
     become: yes
+    tags:
+      - configuration
 
   - name: Copy over opendkim keys
     copy:
       content: "{{ hostvars['localhost']['dkim_private'].stdout }}"
       dest: /etc/opendkim/mail.private
     become: yes
+    tags:
+      - configuration
 
   - name: Copy over opendkim keys
     copy:
       content: "{{ hostvars['localhost']['dkim_public'].stdout }}"
       dest: /etc/opendkim/mail.txt
     become: yes
+    tags:
+      - configuration
 
   - name: Change mode of opendkim private key
     file:
@@ -273,28 +336,38 @@
       owner: opendkim
       group: opendkim
     become: yes
+    tags:
+      - configuration
 
   - name: Install spf validation python script
     apt:
       name: 'postfix-policyd-spf-python'
     become: yes
+    tags:
+      - packages
 
   - name: Copy over spf validation config file
     copy:
       src: policyd-spf.conf
       dest: /etc/postfix-policyd-spf-python/policyd-spf.conf
     become: yes
+    tags:
+      - configuration
 
   - name: Install opendmarc
     apt:
       name: 'opendmarc'
     become: yes
+    tags:
+      - packages   
 
   - name: Create /etc/opendmarc folder
     file:
       path: /etc/opendmarc
       state: directory
     become: yes
+    tags:
+      - packages
 
   - name: Copy over opendmarc configuration files
     template:
@@ -303,6 +376,8 @@
     with_items:
       - { src: 'opendmarc.conf.j2', dest: '/etc/opendmarc.conf' }
     become: yes
+    tags:
+      - configuration
 
   - name: Copy over opendmarc configuration files
     copy:
@@ -312,6 +387,8 @@
       - { src: 'ignore.hosts', dest: '/etc/opendmarc/ignore.hosts' }
       - { src: 'opendmarc', dest: '/etc/default/opendmarc' }
     become: yes
+    tags:
+      - configuration
 
   #rspamd
   - name: set rspamd install variables for non-ARM host
@@ -319,12 +396,16 @@
       apt_key_url: "https://rspamd.com/apt-stable/gpg.key"
       apt_repo_url: [ "deb http://rspamd.com/apt-stable/ {{ ansible_distribution_release  }} main", "deb-src http://rspamd.com/apt-stable/ {{ ansible_distribution_release  }} main"]
     when: ansible_architecture != "armv6l" and ansible_architecture != "armv7l"
+    tags:
+      - packages
 
   - name: set rspamd install variables for ARM host
     set_fact:
       apt_key_url: "http://repo.privacylabs.io/debian/gpg.key"
       apt_repo_url: [ 'deb http://repo.privacylabs.io/debian/ jessie main' ]
     when: ansible_architecture == "armv6l" or ansible_architecture == "armv7l"
+    tags:
+      - packages
 
   - name: Add rspamd repo key
     apt_key:
@@ -332,6 +413,8 @@
       state: present
       validate_certs: false
     become: yes
+    tags:
+      - packages
 
   - name: Install rpsamd stable apt repository
     apt_repository:
@@ -339,6 +422,8 @@
       state: present
     with_items: "{{ apt_repo_url }}"
     become: yes
+    tags:
+      - packages
 
   - name: Install rspamd and dependencies
     apt:
@@ -346,6 +431,8 @@
       update_cache: yes
     with_items: [ 'redis-server', 'rmilter', 'rspamd']
     become: yes
+    tags:
+      - packages
 
   - name: Copy over rmilter.conf
     copy:
@@ -356,6 +443,8 @@
       - { src: 'rmilter.conf.sysvinit', dest: 'rmilter.conf.sysvinit' }
       - { src: 'rmilter.conf.common', dest: 'rmilter.conf.common' }
     become: yes
+    tags:
+      - configuration
 
   - name: restart all services to make sure changes are picked up
     service:
@@ -364,3 +453,5 @@
       state: restarted
     with_items: [ 'postfix', 'dovecot', 'opendkim', 'opendmarc', 'rmilter', 'rspamd' ]
     become: yes
+    tags:
+      - configuration
