@@ -7,6 +7,7 @@
     become: yes
     tags:
       - packages
+    ignore_errors: yes
 
   - name: Copy over postfix configuration files (templates)
     template:
