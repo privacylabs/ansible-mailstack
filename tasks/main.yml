@@ -4,7 +4,7 @@
       name: 'postfix'
       question: 'postfix/mailname'
       vtype: 'string'
-      value: 'mail.{{ domain }}'
+      value: 'raspberrypi'
     become: yes
     tags:
       - packages
