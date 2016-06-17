@@ -3,8 +3,10 @@
   - name: Install postfix packages
     apt:
       name: '{{ item }}'
-    with_items: [ 'postfix', 'postfix-pcre', 'postfix-ldap']
+    with_items: [ 'postfix' ]
     become: yes
+    tags:
+      - packages
 
   - name: Copy over postfix configuration files (templates)
     template:
@@ -38,6 +40,14 @@
     become: yes
     tags:
       - configuration
+      - packages
+
+  - name: Install extra postfix packages
+    apt:
+      name: '{{ item }}'
+    with_items: [ 'postfix-pcre', 'postfix-ldap' ]
+    become: yes
+    tags:
       - packages
 
   - name: Create postfix LDAP account for authenticating users
