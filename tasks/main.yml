@@ -26,7 +26,7 @@
     with_items: [ 'postfix' ]
     become: yes
     tags:
-      - packages
+      - configuration
 
   - name: Copy over postfix configuration files (templates)
     template:
@@ -44,7 +44,6 @@
     become: yes
     tags:
       - configuration
-      - packages
 
   - name: Copy over postfix configuration files
     copy:
@@ -60,7 +59,6 @@
     become: yes
     tags:
       - configuration
-      - packages
 
   - name: Install extra postfix packages
     apt:
@@ -68,7 +66,7 @@
     with_items: [ 'postfix-pcre', 'postfix-ldap' ]
     become: yes
     tags:
-      - packages
+      - configuration
 
   - name: Create postfix LDAP account for authenticating users
     ldap_entry:
@@ -87,7 +85,6 @@
     become: yes
     tags:
       - configuration
-      - packages
 
   #dovecot
   - name: Install dovecot packages
@@ -218,7 +215,7 @@
     register: dh_2048
     become: yes
     tags:
-      - configuration
+      - packages
 
   - name: add one-run service for generating 2048 bit DH parameters if they don't exist
     copy:
@@ -231,7 +228,7 @@
     become: yes
     when: dh_2048.stat.exists == false
     tags:
-      - configuration
+      - packages
 
   - name: Reload systemctl
     command: systemctl daemon-reload
@@ -257,7 +254,7 @@
     become: yes
     when: (hostvars['localhost']['dh_keys'] is undefined) and (dh_2048.stat.exists == false)
     tags:
-      - configuration
+      - packages
 
   - name: Copy DH keys for Postfix PFS if we already created them
     copy:
@@ -266,7 +263,7 @@
     become: yes
     when: hostvars['localhost']['dh_keys'] is defined
     tags:
-      - configuration
+      - packages
 
   - name: link dh params as needed
     file:
@@ -276,7 +273,7 @@
     become: yes
     when: dh_2048.stat.exists == false
     tags:
-      - configuration
+      - packages
 
   - name: add cron job to periodically refresh DH parameters
     cron:
@@ -349,7 +346,7 @@
       dest: /etc/opendkim/mail.private
     become: yes
     tags:
-      - configuration
+      - packages
 
   - name: Copy over opendkim keys
     copy:
@@ -357,7 +354,7 @@
       dest: /etc/opendkim/mail.txt
     become: yes
     tags:
-      - configuration
+      - packages
 
   - name: Change mode of opendkim private key
     file:
@@ -367,14 +364,14 @@
       group: opendkim
     become: yes
     tags:
-      - configuration
+      - packages
 
   - name: Install spf validation python script
     apt:
       name: 'postfix-policyd-spf-python'
     become: yes
     tags:
-      - packages
+      - configuration
 
   - name: Copy over spf validation config file
     copy:
