@@ -198,6 +198,17 @@
     tags:
       - configuration
 
+  - name: create /etc/postfix folder
+    file:
+      path: /etc/postfix
+      state: directory
+      owner: root
+      group: root
+      mode: 0755
+    become: yes
+    tags:
+      - packages
+
   - name: create /etc/postfix/certs folder
     file:
       path: /etc/postfix/certs
