@@ -244,6 +244,7 @@
       - packages
       - configuration
     when: dh_1024.stat.exists == false and dhkey2.stat.exists == false
+    become: yes
 
   - name: add one-run service for generating 2048 bit DH parameters if they don't exist
     copy:
