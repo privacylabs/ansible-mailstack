@@ -470,7 +470,7 @@
     with_items: [ 'redis-server', 'rmilter', 'rspamd']
     become: yes
     tags:
-      - packages
+      - configuration
 
   - name: Copy over rmilter.conf
     copy:
