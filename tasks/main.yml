@@ -26,7 +26,7 @@
     with_items: [ 'postfix' ]
     become: yes
     tags:
-      - configuration
+      - packages
 
   - name: Copy over postfix configuration files (templates)
     template:
@@ -66,7 +66,7 @@
     with_items: [ 'postfix-pcre', 'postfix-ldap' ]
     become: yes
     tags:
-      - configuration
+      - packages
 
   - name: Create postfix LDAP account for authenticating users
     ldap_entry:
@@ -382,7 +382,7 @@
       name: 'postfix-policyd-spf-python'
     become: yes
     tags:
-      - configuration
+      - packages
 
   - name: Copy over spf validation config file
     copy:
@@ -470,7 +470,7 @@
     with_items: [ 'redis-server', 'rmilter', 'rspamd']
     become: yes
     tags:
-      - configuration
+      - packages
 
   - name: Copy over rmilter.conf
     copy:
@@ -482,7 +482,7 @@
       - { src: 'rmilter.conf.common', dest: 'rmilter.conf.common' }
     become: yes
     tags:
-      - configuration
+      - packages
 
   - name: restart all services to make sure changes are picked up
     service:
