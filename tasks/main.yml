@@ -80,6 +80,20 @@
     tags:
       - configuration
 
+  - name: update postfix ldap password
+    ldap_attr:
+      dn: 'uid=postfix,{{ ldap_service_searchbase }}'
+      name: userPassword
+      values: "{{ postfixuserpassword }}"
+      state: exact
+      bind_dn: 'cn=admin,{{ "dc=" + domain.split(".") | join(",dc=") }}'
+      bind_pw: '{{ ldapadminpassword }}'
+      server_uri: 'ldap://{{ ldap_ip }}:389'
+    become: yes
+    no_log: true
+    tags:
+      - configuration
+
   - name: Create hashmap for postfix
     shell: postmap hash:/etc/postfix/virtual_domains
     become: yes
