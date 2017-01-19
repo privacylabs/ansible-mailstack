@@ -373,6 +373,14 @@
     tags:
       - configuration
 
+  - name: Copy over opendkim dns keyblob
+    copy:
+      content: "{{ hostvars['localhost']['dkim_dns'].stdout }}"
+      dest: /etc/opendkim/mail.dns
+    become: yes
+    tags:
+      - configuration
+
   - name: Copy over opendkim keys
     copy:
       content: "{{ hostvars['localhost']['dkim_public'].stdout }}"
