@@ -1,4 +1,19 @@
 ---
+  - name: Install packages for python-ldap pip module
+    apt:
+      name: '{{ item }}'
+    become: yes
+    with_items: [ 'libsasl2-dev', 'python-dev', 'libldap2-dev', 'libssl-dev', 'python-pip' ]
+    tags:
+      - packages
+
+  - name: Install python-ldap pip module
+    pip:
+      name: python-ldap
+    become: yes
+    tags:
+      - packages
+
   - name: Configure domain for postfix in debconf
     debconf:
       name: 'postfix'
