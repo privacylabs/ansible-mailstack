@@ -300,8 +300,6 @@
       state: restarted
     become: yes
     when: dh_2048.stat.exists == false
-    tags:
-      - configuration
 
   - name: link dh params as needed
     file:
@@ -325,8 +323,6 @@
       job: "openssl dhparam -2 -out /etc/postfix/certs/dh_2048.pem 2048"
       state: present
     become: yes
-    tags:
-      - configuration
 
   #opendkim
   - name: Install opendkim packages
