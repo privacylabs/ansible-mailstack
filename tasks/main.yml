@@ -292,8 +292,6 @@
     command: systemctl daemon-reload
     become: yes
     when: dh_2048.stat.exists == false
-    tags:
-      - configuration
 
   - name: Start gen_2kdh_postinstall
     service:
