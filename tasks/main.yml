@@ -523,5 +523,3 @@
       state: restarted
     with_items: [ 'postfix', 'dovecot', 'opendkim', 'opendmarc', 'rmilter', 'rspamd' ]
     become: yes
-    tags:
-      - configuration
